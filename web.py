@@ -1,21 +1,38 @@
 import bs4
 import requests
 
-resultado = requests.get('https://www.leagueoflegends.com/es-es/news/community/drawrenekton-art-competition-winners-announced/')
+"""PROGRAMA PARA EXTRAER TITULOS DE LIBROS DE 4 O 5 ESTRELLAS DE TOSCRAPE"""
 
-#bs4(beautifulsoup) sirve para navegar entre todo el codigo y encontrar los elementos que buscamos
-#pide dos parametros 1(el string a transformar en elemento bs4)2(motor para hacer el parcing)
-beautysoup = bs4.BeautifulSoup(resultado.text, 'lxml')
+#url sin nro de pag
+url_principal = 'https://books.toscrape.com/catalogue/page-{}.html'
 
-#print(beautysoup.select('title')[0].getText())
+#lista de titulos
+titulos_rating_alto = []
 
-imagenes = beautysoup.select('img')[0]['src']
-print(imagenes)
+#loop iterar pags
+for pag in range(1,11): #solo lo puse hasta el 11 pq se me pega la pc xd ponlo como tu quieras
+    #crear soup en cada pag
+    url_pagina = url_principal.format(pag)
+    resultado = requests.get(url_pagina)
+    sopa = bs4.BeautifulSoup(resultado.text, 'lxml')
 
-imgen_renek = requests.get(imagenes)
+    #selecciono datos de los libros
+    libros = sopa.select('.product_pod')
 
-#wb = writewrite binary
-d = open('renek_img.jpg', 'wb')
-d.write(imgen_renek.content)
-d.close()
+    #iterar libros
+    for libro in libros:
+
+        #ver si tienen 4 o 5 estrellas
+        if len(libro.select('.star-rating.Four')) != 0 or len(libro.select('.star-rating.Five')):
+
+            #guardar titulo en variable 
+            titulo_libro = libro.select('a')[1]['title']
+
+            #agregar libro a lista
+            titulos_rating_alto.append(titulo_libro)
+
+#ver libros en terminal
+
+for titulo in titulos_rating_alto:
+    print(titulo)
 
